@@ -41,7 +41,9 @@ App.MusicRoute = Ember.Route.extend({
                 return Ember.$.getJSON(ytUrl(song.title, song.artist_name));
             });
             return Ember.RSVP.all(promises).then(function (songs) {
-                return songs.filter(function (songId) {
+                return songs.map(function (song) {
+                    return song.items[0].id.videoId;
+                }).filter(function (songId) {
                     return typeof songId !== 'undefined';
                 }).splice(0, 15);
             });
