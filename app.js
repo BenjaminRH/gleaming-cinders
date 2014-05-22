@@ -38,13 +38,11 @@ App.MusicRoute = Ember.Route.extend({
             }
             songList = songList.splice(0, 25);
             var promises = songList.map(function (song) {
-                return Ember.$.getJSON('http://jsonp.jit.su/?callback=?&url=' + encodeURIComponent(tinyUrl(song.title, song.artist_name)));
+                return Ember.$.getJSON(ytUrl(song.title, song.artist_name));
             });
             return Ember.RSVP.all(promises).then(function (songs) {
-                return songs.map(function (song) {
-                    return newSong(song);
-                }).filter(function (song) {
-                    return typeof song.id !== 'undefined';
+                return songs.filter(function (songId) {
+                    return typeof songId !== 'undefined';
                 }).splice(0, 15);
             });
         });
@@ -55,14 +53,20 @@ App.MusicRoute = Ember.Route.extend({
     }
 });
 
-function newSong (song) {
-    return {
-        id: song.SongID,
-        name: song.SongName,
-        artist: song.ArtistName,
-        album: song.AlbumName
-    };
-}
+Ember.Handlebars.helper('ytPlaylist', function (songs) {
+    if (songs.length < 1) {
+        return new Ember.Handlebars.SafeString('<h3>No music was found.</h3>');
+    }
+    return new Ember.Handlebars.SafeString(''
+        +'<iframe class="ytPlaylist" width="560" height="315"'
+            +'src="https://www.youtube.com/embed/'
+            +Handlebars.Utils.escapeExpression(songs[0])
+            +'?playlist='
+            +Handlebars.Utils.escapeExpression(songs.splice(1, songs.length-1).join(','))
+            +'" frameborder="0" allowfullscreen'
+        +'></iframe>'
+    );
+});
 
 Ember.Handlebars.helper('groovesharkPlayerMini', function (song) {
     return new Ember.Handlebars.SafeString(''
@@ -80,7 +84,7 @@ App.IndexController = Ember.ObjectController.extend({
     actions: {
         burn: function () {
             var style = this.get('styles')[this.get('styles').indexOf(this.get('selectedStyle')) - 1];
-            style = this.get('fullStyles')[style].join(',').replace(/ /g, '+');
+            style = this.get('fullStyles')[style].join(',');
             var mood1 = this.get('moods')[this.get('moods').indexOf(this.get('selectedMood1')) - 1];
             var mood2 = this.get('moods')[this.get('moods').indexOf(this.get('selectedMood2')) - 1];
 
@@ -100,19 +104,19 @@ function echoUrl (styles, moods) {
     for (var i= 0; i < styles.length; i++) {
         styleString += '&style=';
         if (styles.length === 1) styleString += '^';
-        styleString += styles[i];
+        styleString += styles[i].replace(/ /g, '+');
     }
     for (var i= 0; i < moods.length; i++) {
-        moodString += '&mood=' + moods[i];
+        moodString += '&mood=' + moods[i].replace(/ /g, '+');
     }
-    return  'https://developer.echonest.com/api/v4/song/search?format=jsonp&api_key=VUY4OZGKUB2ELFELQ&bucket=song_hotttnesss&results=100&sort=song_hotttnesss-desc' + styleString + moodString;
+    return  'https://developer.echonest.com/api/v4/song/search?format=jsonp&api_key=VUY4OZGKUB2ELFELQ&min_duration=240&bucket=song_hotttnesss&results=100&sort=song_hotttnesss-desc' + styleString + moodString;
 };
 
-// Return a properly formatted API query string for Tinysong
-// http://tinysong.com/b/name+artist?format=json&key=e023a8f47788a4047eeaf2e3833dcafe
-// { SongID, SongName, ArtistName, AlbumName }
-function tinyUrl (name, artist) {
-    return  'http://tinysong.com/b/' + encodeURIComponent(name) + '+' + encodeURIComponent(artist) + '?format=json&key=e023a8f47788a4047eeaf2e3833dcafe';
+// Return a properly formatted API query string for Youtube
+// https://www.googleapis.com/youtube/v3/search?callback=?&type=video&part=id&order=relevance&videoEmbeddable=true&videoDuration=medium&safeSearch=none&key=AIzaSyBQ3KsBMzLuFL8kub1hGQVswV18crZUscE&maxResults=1&q=
+// { items [ { id { videoId } } ] }
+function ytUrl (name, artist) {
+    return  'https://www.googleapis.com/youtube/v3/search?callback=?&type=video&part=id&order=relevance&videoEmbeddable=true&videoDuration=medium&safeSearch=none&key=AIzaSyBQ3KsBMzLuFL8kub1hGQVswV18crZUscE&maxResults=1&q=' + encodeURIComponent(name.replace(/ /g, '+')) + '+' + encodeURIComponent(artist.replace(/ /g, '+'));
 };
 
 var dups = {};      // used to eliminate dup songs

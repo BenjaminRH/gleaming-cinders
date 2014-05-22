@@ -8,14 +8,29 @@ body {
     margin: 0 auto;
 }
 
+.ytPlaylist {
+    width: 560px;
+    height: 315px;
+}
+
 @media(max-width: 768px) {
     .center-box {
         padding-top: 70px;
+    }
+
+    .ytPlaylist {
+        width: 400px;
+        height: 250px;
     }
 }
 
 @media(max-width: 480px) {
     .center-box {
         padding-top: 40px;
+    }
+
+    .ytPlaylist {
+        width: 300px;
+        height: 100px;
     }
 }

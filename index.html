@@ -38,14 +38,7 @@
         <div class="pure-u-1" style="text-align: center;">
             <div class="center-box" style="text-align: center;">
                 <h2>Music</h2>
-                {{#each song in model}}
-                    {{song.name}}
-                    <br>
-                    {{groovesharkPlayerMini song}}
-                    <br><br>
-                {{else}}
-                    <h3>No music was found (or there was a problem connecting to a data source)</h3>
-                {{/each}}
+                {{ytPlaylist model}}
             </div>
         </div>
     </script>
