@@ -1,0 +1,21 @@
+body {
+    font-size: 20px;
+}
+
+.center-box {
+    padding-top: 100px;
+    display: inline-block;
+    margin: 0 auto;
+}
+
+@media(max-width: 768px) {
+    .center-box {
+        padding-top: 70px;
+    }
+}
+
+@media(max-width: 480px) {
+    .center-box {
+        padding-top: 40px;
+    }
+}
