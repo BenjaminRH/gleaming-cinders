@@ -41,10 +41,10 @@ App.MusicRoute = Ember.Route.extend({
                 return Ember.$.getJSON(ytUrl(song.title, song.artist_name));
             });
             return Ember.RSVP.all(promises).then(function (songs) {
-                return songs.map(function (song) {
+                return songs.filter(function (song) {
+                    return typeof song.items !== 'undefined' && song.items.length > 0;
+                }).map(function (song) {
                     return song.items[0].id.videoId;
-                }).filter(function (songId) {
-                    return typeof songId !== 'undefined';
                 }).splice(0, 15);
             });
         });
